@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <title>Work with Lazy BoY</title>
+</head>
+<body>
+    
+    <div class="box center-box">
+        <h1 class="bright-blue">Work with Lazy BoY</h1>
+    </div>
+    
+ 
+
+    <div class="chat-box">
+        <div id="chat-messages" class="chat-messages">
+            <!-- Initial welcome message from bot -->
+            <div class="message">Mr_Lazy_boy: "Hello! I am Lazy Boy. How can I assist you today?<br><br>Say hello to launch the script"<br></div>
+        </div>
+        <div class="user-input">
+            <form id="chat-form">
+                <input type="text" id="user-message-input" name="user_message" placeholder="Type your message here...">
+                <!-- Change the type to "submit" to trigger form submission -->
+                <button type="submit" style="display: none;"></button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Function to handle sending message
+        function sendMessage() {
+            var userMessage = document.getElementById("user-message-input").value;
+            var chatMessages = document.getElementById("chat-messages");
+            var newMessage = document.createElement("div");
+            newMessage.className = "message";
+            newMessage.innerHTML = "<span class='user'>You:</span> " + userMessage.replace(/\n/g, "<br>");
+            chatMessages.appendChild(newMessage);
+            document.getElementById("user-message-input").value = "";
+    
+            // Scroll to the bottom of the chat window after sending the message
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+            // Send userMessage to backend for processing
+            fetch('/process_user_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 'user_message': userMessage })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display bot's response in the chat
+                var botMessage = document.createElement("div");
+                botMessage.className = "message";
+                botMessage.innerHTML = "<span class='bot'>Mr_Lazy_boy:</span> " + data.response.replace(/\n/g, "<br>");
+                chatMessages.appendChild(botMessage);
+    
+                // Scroll to the bottom of the chat window after receiving the bot's response
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    
+        // Add event listener for "keypress" event on input field
+        document.getElementById("user-message-input").addEventListener("keypress", function(event) {
+            // Check if the key pressed is "Enter"
+            if (event.key === "Enter") {
+                // Prevent default form submission behavior
+                event.preventDefault();
+                // Call sendMessage function
+                sendMessage();
+            }
+        });
+    </script>
+    
+
+</body>
+</html>

@@ -1,0 +1,471 @@
+
+
+
+
+
+from flask import Flask, render_template, request
+from googletrans import Translator
+
+app = Flask(__name__)
+
+translator = Translator()
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/translate', methods=['POST'])
+def translate_message():
+    user_message_french = request.form['user_message_french']
+    user_message_english = translator.translate(user_message_french, src='fr', dest='en').text
+    return render_template('translated_message.html', user_message_english=user_message_english)
+
+# Implement routes for other functionalities similarly
+
+if __name__ == "__main__":
+    app.run(host='localhost', port=5500, debug=True)
+
+
+
+
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+@app.route('/index.html')
+def index():
+    return render_template('/index.html')
+
+def screenshot_part(SS):
+    if SS == 'N/A':
+        screenshot_html = """
+        User information<br>
+        Add a screenshot of the Wazetool user:<br>
+        <u><a>N/A</a></u>
+        """
+    else:
+        screenshot_html = f"""
+        User information<br>
+        Add a screenshot of the Wazetool user:<br>
+        <u><a href="{SS}">SS</a></u>
+        """
+    return screenshot_html
+
+@app.route('/', methods=['GET', 'POST'])
+def handle_screenshot():
+    if request.method == 'POST':
+        SS_URL = request.form['screenshot_url']
+        screenshot_content = screenshot_part(SS_URL)
+    else:
+        # Render the form without screenshot content if it's a GET request
+        screenshot_content = ""
+    return render_template('index.html', screenshot_content=screenshot_content)
+
+if __name__ == "__main__":
+    app.run(host='localhost', port=5500, debug=True)
+
+from IPython.display import HTML
+
+
+SS = input('Please add the user screenshot')
+
+def screenshot_part(SS):
+    
+    if SS == 'N/A':
+        screenshot_html = """
+        User information<br>
+        Add a screenshot of the Wazetool user:<br>
+        <u><a>N/A</a></u>
+        """
+    else:
+        screenshot_html = f"""
+        User information<br>
+        Add a screenshot of the Wazetool user:<br>
+        <u><a href="{SS}">SS</a></u>
+        """
+    return screenshot_html
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Bot</title>
+</head>
+<body>
+    <h1>Chat with Bot</h1>
+    <div id="chat-box">
+        <div id="chat-log"></div>
+        <input type="text" id="user-input" placeholder="Type your message here...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        function sendMessage() {
+            var userInput = document.getElementById('user-input').value;
+            document.getElementById('chat-log').innerHTML += '<p>You: ' + userInput + '</p>';
+            document.getElementById('user-input').value = '';
+
+            fetch('/reply', {
+                method: 'POST',
+                body: new URLSearchParams({'user_input': userInput}),
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('chat-log').innerHTML += '<p>Bot: ' + data + '</p>';
+            });
+        }
+    </script>
+</body>
+</html>
+
+
+from flask import Flask, render_template, request
+from my_bot import get_bot_response
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/reply', methods=['POST'])
+def reply():
+    user_input = request.form['user_input']
+    bot_response = get_bot_response(user_input)
+    return bot_response
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+@app.route('/index.html')
+def index():
+    return render_template('index.html')
+
+if __name__ == "__main__":
+    app.run(host='localhost', port=5500, debug=True)
+
+
+
+
+
+from IPython.display import HTML
+
+
+SS = input('Please add the user screenshot')
+
+def screenshot_part(SS):
+    
+    if SS == 'N/A':
+        screenshot_html = """
+        User information<br>
+        Add a screenshot of the Wazetool user:<br>
+        <u><a>N/A</a></u>
+        """
+    else:
+        screenshot_html = f"""
+        User information<br>
+        Add a screenshot of the Wazetool user:<br>
+        <u><a href="{SS}">SS</a></u>
+        """
+    return screenshot_html
+
+
+
+@app.route('/reply', methods=['POST'])
+def reply():
+    user_input = request.form['user_input']
+    bot_response = get_bot_response(user_input)
+    return bot_response
+def get_bot_response(user_input):
+    # Define your bot's logic here, based on the user's input
+    if user_input.lower() == 'hello':
+        return "Hi there!"
+    elif user_input.lower() == 'how are you?':
+        return "I'm just a bot, but thanks for asking!"
+    else:
+        return "I'm sorry, I didn't understand that."
+
+
+
+127.0.0.1 - - [19/Mar/2024 15:24:00] "GET /?user_message=hi HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2024 15:24:00] "GET /static/style.css HTTP/1.1" 304 -
+127.0.0.1 - - [19/Mar/2024 15:24:06] "GET /?user_message=hi HTTP/1.1" 200 -
+127.0.0.1 - - [19/Mar/2024 15:24:06] "GET /static/style.css HTTP/1.1" 304 
+
+
+from flask import Flask, render_template, request
+from reply import my_bot
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/', methods=['GET', 'POST'])
+def handle_chat():
+    if request.method == 'POST':
+        user_message = request.form['message']
+        
+        # Check if the user message is equal to a specific trigger message
+        if user_message.strip().lower() == "hello lazy boy":
+            # Send the message to the bot script
+            response = my_bot.process_message(user_message)
+        else:
+            # Handle other user messages here
+            response = "Sorry, this is not the magical word to work faster, Baby boy."
+
+        return render_template('index.html', response=response)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+
+
+app = Flask(__name__)
+
+
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    if request.method == 'POST':
+        user_message = request.form.get('user_message')
+        if user_message:
+            # Check if the user message is equal to a specific trigger message
+            if user_message.strip().lower() == "hello":
+                # Send the message to the bot script
+                response = input('Please add the user screenshot')
+                
+
+            else:
+                # Handle other user messages here
+                response = "Sorry, this is not the magical word to work faster, Baby boy."
+            return render_template('index.html', response=response)
+        else:
+            return render_template('index.html')
+    else:
+        return render_template('index.html')
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    if request.method == 'POST':
+        user_message = request.form.get('user_message')
+        if user_message:
+            # Check if the user message is equal to a specific trigger message
+            if user_message.strip().lower() == "hello":
+                # Prompt the user to add a screenshot
+                response = "Please add the user screenshot"
+            else:
+                # Handle other user messages here
+                response = "Sorry, this is not the magical word to work faster, Baby boy."
+            return render_template('index.html', response=response)
+        else:
+            return render_template('index.html')
+    else:
+        return render_template('index.html')
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    if request.method == 'POST':
+        user_message = request.form.get('user_message')
+        if user_message:
+            # Process user message using your bot
+            response = my_bot.process_message(user_message)
+            
+        else:
+            response = "Please enter a message."
+            screenshot_content = ""  # No screenshot content if no message
+            
+        return render_template('index.html', response=response, screenshot_content=screenshot_content)
+    else:
+        # Handle GET request (initial page load)
+        return render_template('index.html')
+
+
+
+
+from flask_socketio import SocketIO
+from flask import Flask, render_template
+
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
+socketio = SocketIO(app)
+
+@app.route('/')
+def sessions():
+    return render_template('index.html')
+
+def messageReceived(methods=['GET', 'POST']):
+    print('message was received!!!')
+
+@socketio.on('my event')
+def handle_my_custom_event(json, methods=['GET', 'POST']):
+    print('received my event: ' + str(json))
+    socketio.emit('my response', json, callback=messageReceived)
+
+if __name__ == '__main__':
+    socketio.run(app, debug=True)
+
+
+
+from flask import Flask, render_template, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/process_user_message', methods=['POST'])
+def process_user_message():
+    user_message = request.json.get('user_message')
+
+    # Process the user message (replace this with your processing logic)
+    if user_message.strip().lower() == 'hello':
+        response = "Please add the user screenshot"
+    else:
+        response = "Sorry, I didn't understand that."
+
+    return jsonify({'response': response})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+
+
+from flask import Flask, render_template, request, jsonify
+from IPython.display import HTML
+
+
+
+app = Flask(__name__)
+
+# Home route to render index.html
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/process_user_message', methods=['POST'])
+# Route to process user message
+def process_user_message():
+    user_message = request.json.get('user_message')
+    
+    # Placeholder response for the user message
+    response = "How are You I am lazy Boy here to help you"
+    
+    user_message = request.json.get('user_message')
+    # Placeholder response for the screenshot
+    if 'N/A' in user_message:
+        screenshot_html = """
+        User information<br>
+        Add a screenshot of the Wazetool user:<br>
+        <u><a>N/A</a></u>
+        """
+    else:
+        screenshot_html = f"""
+        User information<br>
+        Add a screenshot of the Wazetool user:<br>
+        <u><a href=">SS</a></u>
+        """
+    
+    return jsonify({'response': response, 'screenshot_html': screenshot_html})
+
+
+# Route to add a screenshot link based on user input
+
+def screenshot_part():
+    user_message = request.json.get('user_message')
+    
+    if '/' in user_message:
+        screenshot_html = """
+        User information<br>
+        Add a screenshot of the Wazetool user:<br>
+        <u><a>N/A</a></u>
+        """
+    else:
+        screenshot_html = f"""
+        User information<br>
+        Add a screenshot of the Wazetool user:<br>
+        <u><a href="{user_message}">SS</a></u>
+        """
+        
+    return jsonify({'screenshot_html': screenshot_html})
+
+# Function to translate user message from French to English
+def translate_message(user_message_french):
+    translator = Translator()
+    user_message_english = translator.translate(user_message_french, src='fr', dest='en').text
+    return user_message_english
+
+# Function to handle duplicates
+def handle_duplicates(user_input):
+    if any(c.isdigit() for c in user_input) and all(c.isdigit() or c == ',' for c in user_input):
+        numbers = [num.strip() for num in user_input.split(',')]
+        return f'Are there any duplicates?\nYES\n{", ".join(numbers)}'
+    elif user_input.lower() == 'no':
+        return 'Are there any duplicates?\nNO'
+    else:
+        return 'Invalid input. Please enter either "NO" or a sequence of numbers separated by commas.'
+
+# Function to handle account-level actions
+def handle_account_level_actions(user_input):
+    if user_input.lower() == 'yes':
+        user_change = input('Describe the change you made')  # Placeholder, replace with actual logic
+    elif user_input.lower() == 'no':
+        return 'Are there any actions taken at the account level?\nNO'
+
+# Function to handle debug logs
+def handle_debug_logs(user_input):
+    if user_input.lower() == 'yes':
+        user_debugl_link = input('input the debug log user link')  # Placeholder, replace with actual logic
+        return f"""
+        Are there any logs in debug?:<br>
+        <u><a href="{user_debugl_link}">debug log</a></u>
+        """
+    elif user_input.lower() == 'no':
+        return 'Are there any logs in debug?\nNO'
+
+# Main function to run the Flask app
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+
+
+
+
